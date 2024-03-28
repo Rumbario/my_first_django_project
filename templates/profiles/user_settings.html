@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2 class="text-center mt-4 mb-3">Настройки</h2>
+    <form method="post" enctype="multipart/form-data" class="my-form" action="{% url 'user_settings' %}">
+
+        {% csrf_token %}
+        {{ form.username.label_tag }} {{ form.username }}<br>
+        {{ form.first_name.label_tag }} {{ form.first_name }}<br>
+        {{ form.last_name.label_tag }} {{ form.last_name }}<br>
+        {{ form.email.label_tag }} {{ form.email }}<br>
+        {{ form.profile_picture_url.label_tag }} {{ form.profile_picture_url }}<br>
+        <label for="id_date_joined">Дата на създаване:</label>
+        <input type="text" id="id_date_joined" name="date_joined" value="{{ request.user.date_joined|date:"Y-m-d H:i:s" }}" readonly><br>
+        <label for="id_last_login">Последно влизане:</label>
+        <input type="text" id="id_last_login" name="last_login" value="{{ request.user.last_login|date:"Y-m-d H:i:s" }}" readonly><br>
+         <label for="id_profile_picture">Профилна снимка:</label>
+        <input type="file" id="id_profile_picture" name="profile_picture" accept="image/*"><br>
+        
+        <button type="submit" class="bg-dark">Промени</button>
+    </form>
+{% endblock %}
+

@@ -1,0 +1,47 @@
+/* Add this to your existing CSS file or create a new one */
+
+.my-form {
+    max-width: 400px;
+    margin: 20px auto; /* Add margin for spacing */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.my-form label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.my-form input,
+.my-form select,
+.my-form textarea,
+.my-form button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+
+}
+
+.my-form button {
+
+    color: white;
+
+
+}
+
+
+
+/* Add spacing between header and form */
+.container {
+    margin-top: 20px;
+}
+
+/* Add spacing between form and footer */
+footer {
+    margin-top: 20px;
+}
+.my-form {
+    margin-bottom: 100px; /* Задава голям отстъп от долния край на формата */
+}

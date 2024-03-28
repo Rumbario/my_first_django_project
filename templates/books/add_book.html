@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2 class="text-center mt-4 mb-3">Добави книга</h2>
+    
+    <form method="post" enctype="multipart/form-data" class="my-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="bg-dark">Добави</button>
+    </form>
+{% endblock %}

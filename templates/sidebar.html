@@ -1,0 +1,14 @@
+<nav class="col-md-2 d-none d-md-block bg-light">
+    <div class="sidebar-sticky">
+        <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span></span>
+        </h5>
+        <ul class="nav flex-column">
+            {% for category, book_count in category_counts.items %}
+                <li class="nav-item">
+                    <a class="nav-link text-primary" href="{% url 'genre_books' category %}">{{ category }} ({{ book_count }})</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</nav>

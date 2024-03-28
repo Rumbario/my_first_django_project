@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Review Website</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/register_form.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/login_form.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/comment.css' %}" />
+    <style>
+        .sidebar-sticky {
+            border-right: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="{% static '/images/logo.PNG' %}" alt="Logo" style="width: 35%;">
+            </a>
+            {% if user.is_authenticated %}
+                <ul class="navbar-nav ml-auto mr-5">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span style="color: #ffc107;">
+    <i class="fas fa-user"></i>  {{ user.username }} !
+</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="userDropdown" style="min-width: 200px;">
+                            <div class="dropdown-item">
+                                {% if user.profile.profile_picture %}
+                                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Image" class="profile-image-navbar rounded-circle mr-2" style="width: 75%;">
+                                {% else %}
+                                    <img src="{% static 'images/default.jpg' %}" alt="Default Profile Image" class="profile-image-navbar rounded-circle mr-2" style="width: 75%;">
+                                {% endif %}
+                            </div>
+                            <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                <a href="{% url 'user_settings' %}">Настройки</a>
+                            </div>
+                            <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                <a href="{% url 'change_password' %}">Смяна на парола</a>
+                            </div>
+                            {% if user.is_superuser or user.is_staff %}
+                                <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                    <a href="{% url 'add_book' %}">Добави книга</a>
+                                </div>
+                            {% endif %}
+                            <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                <a href="{% url 'logout' %}">Изход</a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            {% else %}
+                <ul class="navbar-nav ml-auto mr-5">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt mr-2"></i> Вход</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{%  url 'register' %}"><i class="fas fa-user-plus mr-2" data-toggle="modal" data-target="#registrationModal"></i> Регистрация</a></li>
+                </ul>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+        
+        {%  include 'sidebar.html' %}
+
+            <main role="main" class="col-md-9 ml-3">
+                <div class="container">
+                    {% block content %}
+
+                    {% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+             <p style="color: #ffc107;">&copy; 2024 Book Review Website. All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

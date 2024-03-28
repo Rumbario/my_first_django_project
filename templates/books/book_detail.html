@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<main class="container mt-5 mb-2">
+   <div class="row">
+    <div class="col-md-4 mb-6 mr-md-4">
+        <a href="{% url 'book_detail' book.id %}">
+            <img src="{{ book.book_cover.url }}" class="img-fluid" alt="Book Cover" style="max-width: 215px;">
+        </a>
+    </div>
+    <div class="col-md-7">
+    <h2>{{ book.title }}</h2>
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <p><strong>Автор:</strong> {{ book.author }}</p>
+            <p><strong>Година на издаване:</strong> {{ book.publication_year }}</p>
+            <p><strong>Жанр:</strong> {{ book.genre }}</p>
+            <p><strong>Брой страници:</strong> {{ book.pages }}</p>
+            <p><strong>Рейтинг:</strong> {{ book.rating }}</p>
+             <p><a href="#" class="btn btn-info" data-toggle="collapse" data-target="#description">Прочети резюме</a></p>
+        </div>
+        {% if request.user.is_superuser or request.user.is_staff %}
+        <div class="d-inline-flex align-items-center ml-3" style="margin-top: -30px;"> 
+            <a href="{% url 'book_update' book.id %}" class="btn btn-warning flex-fill mr-2"><i class="fas fa-edit"></i></a>
+            <a href="{% url 'book_delete' book.id %}" class="btn btn-danger flex-fill"><i class="fas fa-trash"></i></a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+            </div>
+       <div id="description" class="collapse">
+        <div class="card card-body">
+            <h4 class="card-title center">Резюме:</h4>
+            <p class="card-text">{{ book.description }}</p>
+        </div>
+    </div>
+
+
+
+
+
+
+<div class="book-details">
+    <form action="{% url 'add_comment' book.id %}" method="post" class="comment-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="comment-text">Добавете коментар:</label>
+            <textarea id="comment-text" name="text" cols="30" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="bg-dark">Добави коментар</button>
+    </form>
+</div>
+
+
+
+
+
+
+
+<div class="comments">
+    <h2>Коментари</h2>
+    {% if book.comment_set.all %}
+        {% for comment in book.comment_set.all %}
+            <div class="comment" id="comment-{{ comment.id }}">
+
+                <div class="comment-meta">
+
+    <img src=" {{ user_profile_picture.url }} " alt="Profile Picture" class="comment-profile-pic rounded-circle float-left mr-2" style="width: 40px; height: 40px;">
+    <span class="comment-author"><strong>{{ comment.user.username }}</strong></span>
+    <span class="comment-date">{{ comment.created_at }}</span>
+
+</div>
+                <div class="comment-content">
+                    <p>{{ comment.text }}</p>
+                    {% if comment.image %}
+                        <img src="{{ comment.image.url }}" alt="Comment Image" class="comment-image">
+                    {% endif %}
+                </div>
+
+                <div class="comment-actions">
+                    <a href="#reply-form-{{ comment.id }}" class="reply-link" data-toggle="collapse">
+                        <i class="fas fa-reply"></i>
+                    </a>
+                    <a href="#" class="like-icon">
+                        <i class="fas fa-thumbs-up"></i>
+                    </a>
+                    <div id="reply-form-{{ comment.id }}" class="collapse reply-form">
+                        <form action="{% url 'reply_comment' comment_id=comment.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="comment-reply-text">Отговор на {{ comment.user.username }}</label>
+                                <textarea class="form-control" id="comment-reply-text" name="text" rows="3"></textarea>
+                            </div>
+                            <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+                            <button type="submit" class="btn btn-primary btn-sm">Изпрати</button>
+                        </form>
+                    </div>
+                </div>
+              <div class="replies collapse" id="replies-{{ comment.id }}">
+    {% for reply in comment.replycomment_set.all %}
+        <div class="reply" style="margin-left: 60px;">
+            <div class="reply-meta">
+                <img src="{{ reply.user.profile_picture.url }}" alt="Profile Picture" class="reply-profile-pic rounded-circle float-left mr-2" style="width: 40px; height: 40px;">
+                <span class="reply-author"><strong>{{ reply.user.username }}</strong></span>
+                <span class="reply-date">{{ reply.created_at }}</span>
+            </div>
+            <p>{{ reply.text }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+                <button class="btn btn-outline-primary btn-sm toggle-replies-btn" type="button" data-toggle="collapse" data-target="#replies-{{ comment.id }}" aria-expanded="false" aria-controls="replies-{{ comment.id }}">
+                    Покажи
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<script>
+
+    var toggleButtons = document.querySelectorAll('.toggle-replies-btn');
+    toggleButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var repliesCount = this.parentNode.querySelector('.replies').querySelectorAll('.reply').length;
+
+            if (this.textContent === 'Скрий ' + repliesCount + ' отговора/а') {
+                this.textContent = 'Покажи ' + repliesCount + ' отговора/а';
+            } else {
+                this.textContent = 'Скрий ' + repliesCount + ' отговора/а';
+            }
+        });
+    });
+</script>
+
+
+
+{% endblock %}
+
+
+
+
+
+

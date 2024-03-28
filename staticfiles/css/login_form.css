@@ -1,0 +1,45 @@
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure the body takes at least the full height of the viewport */
+}
+
+.container {
+  flex: 1; /* Grow and take available space */
+}
+.my-form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.my-form label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.my-form input,
+.my-form select,
+.my-form textarea,
+.my-form button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.my-form button {
+    color: white;
+   /* Add your desired background color */
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+.my-form {
+    margin-bottom: 100px; /* Задава голям отстъп от долния край на формата */
+}
