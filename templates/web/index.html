@@ -1,69 +1,81 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<main class="container mt-5 mb-2">
-    <h1 class="text-center">Всички книги</h1>
-    <form class="d-flex mb-4">
-        <input type="text" class="form-control mr-2" placeholder="Search...">
-        <button class="btn btn-primary" type="submit">Search</button>
-    </form>
-    
+{% if user.is_authenticated %}
+<div class="hero-banner text-center border border-dark p-3">
+    <div class="container">
+        <h1 class="display-4">Добре дошли, <span class="font-weight-bold">{{ user.first_name }}</span>!</h1>
+    </div>
+</div>
+{% else %}
+<div class="hero-banner text-center border border-dark p-3">
+    <div class="container">
+        <h1 class="display-4">Добре дошли в  <span class="font-weight-bold">Bookstagram</span>!</h1>
+         <p class="lead">Открийте най-новите заглавия, класически романи и много други. Изследвайте нашия огромен избор и открийте следващата си любима книга.</p>
+    </div>
+</div>
+{% endif %}
+
+
+
+
+<div class="container mt-4">
     <div class="row">
-        {% for book in books %}
-            <div class="col-md-2 mb-3" style="margin-bottom: 10px;">
-                <div class="text-left">
-                    <a href="{% url "book_detail" book.id %}">
-                        {% if book.book_cover %}
-                            <img src="{{ book.book_cover.url }}" class="card-img-top" alt="Book Cover">
-                        {% endif %}
-                    </a>
-                    <div class="card-body">
-                        <a href="{% url 'book_detail' book.id %}"><h5 class="card-title mb-0" style="font-size: 14px;">{{ book.title }}</h5></a>
-                        <p class="mb-0" style="font-size: 12px; color: darkgray;">{{ book.author }}</p>
-                    </div>
+        {% for i in books %}
+        <div class="col-md-4 book-card {% if forloop.counter > 3 %}d-none{% endif %}">
+            <div class="card mb-4">
+                <a href="{% url 'book_detail' i.id %}">
+    <img src="{{ i.book_cover.url }}" class="card-img-top" alt="Book Cover">
+</a>
+                <div class="card-body">
+
+
+
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
+    <div class="text-center mt-4">
+    <a class="btn btn-dark btn-lg prev-btn" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); margin-right: 10px;"><span>&lt;</span></a>
+    <a class="btn btn-dark btn-lg next-btn" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); margin-left: 10px;"><span>&gt;</span></a>
+</div>
+</div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const prevBtn = document.querySelector(".prev-btn");
+        const nextBtn = document.querySelector(".next-btn");
+        const bookCards = document.querySelectorAll(".book-card");
+        let startIndex = 0;
 
-    <nav aria-label="Books Pagination">
-        <ul class="pagination justify-content-center">
-            {% if books.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="First">
-                        <span aria-hidden="true">&laquo;</span>
-                        <span class="sr-only">First</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ books.previous_page_number }}" aria-label="Previous">
-                        <span aria-hidden="true">&lsaquo;</span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                </li>
-            {% endif %}
-            {% for num in books.paginator.page_range %}
-                <li class="page-item {% if num == books.number %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-            {% endfor %}
-            {% if books.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ books.next_page_number }}" aria-label="Next">
-                        <span aria-hidden="true">&rsaquo;</span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ books.paginator.num_pages }}" aria-label="Last">
-                        <span aria-hidden="true">&raquo;</span>
-                        <span class="sr-only">Last</span>
-                    </a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
-</main>
+        function showBooks(start) {
+            for (let i = 0; i < bookCards.length; i++) {
+                if (i >= start && i < start + 3) {
+                    bookCards[i].classList.remove("d-none");
+                } else {
+                    bookCards[i].classList.add("d-none");
+                }
+            }
+        }
+
+        prevBtn.addEventListener("click", function() {
+            if (startIndex > 0) {
+                startIndex -= 3;
+                showBooks(startIndex);
+            }
+        });
+
+        nextBtn.addEventListener("click", function() {
+            if (startIndex + 3 < bookCards.length) {
+                startIndex += 3;
+                showBooks(startIndex);
+            }
+        });
+    });
+</script>
 
 {% endblock %}
+
+
+

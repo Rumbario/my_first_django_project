@@ -1,86 +1,69 @@
-
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-
-from .models import Comment, CommentLike, ReplyComment
+from django.views import View
+from .forms import CommentForm, ReplyForm
+from .models import Comment, CommentLike, CommentReply
 from ..books.models import Book
-from django.shortcuts import render, redirect
-from .models import Comment
-from .forms import CommentReplyForm
-
 
 @login_required
 def add_comment(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
     if request.method == 'POST':
-        text = request.POST['text']
-        book = get_object_or_404(Book, pk=book_id)
-        Comment.objects.create(user=request.user, book=book, text=text)
-        return redirect('book_detail', pk=book_id)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            comment = Comment.objects.create(user=request.user, book=book, text=text)
+            redirect_url = reverse('book_detail', kwargs={'pk': book_id}) + f'?comment_id={comment.pk}'
+            return HttpResponseRedirect(redirect_url)
     else:
-        return redirect('book_detail', pk=book_id)
+        form = CommentForm()
+    comments = Comment.objects.filter(book=book)
+    return render(request, 'books/book_detail.html', {'form': form, 'comments': comments, 'book': book})
+
 
 @login_required
-def like_comment(request, comment_id):
+def add_reply(request, comment_id):
     comment = get_object_or_404(Comment, pk=comment_id)
-    user = request.user
-    if user.is_authenticated:
-        if CommentLike.objects.filter(comment=comment, user=user).exists():
-
-            CommentLike.objects.filter(comment=comment, user=user).delete()
-        else:
-
-            CommentLike.objects.create(comment=comment, user=user)
-    return redirect('book_detail', book_id=comment.book.id)
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)
+        if form.is_valid():
+            reply_text = form.cleaned_data['text']
+            reply = CommentReply.objects.create(user=request.user, comment=comment, text=reply_text)
+            return redirect('book_detail', pk=comment.book.pk)
+    else:
+        form = ReplyForm()
+    return render(request, 'books/book_detail.html', {'form': form, 'comment': comment})
 
 
 @login_required
-def reply_comment(request, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
-
+def book_detail(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+    comments = Comment.objects.filter(book=book).order_by('-created_at')
+    comment_replies = CommentReply.objects.filter(comment__in=comments).select_related('comment').order_by('-created_at')
+    comment_reply_dict = {}
+    for reply in comment_replies:
+        if reply.comment_id not in comment_reply_dict:
+            comment_reply_dict[reply.comment_id] = []
+        comment_reply_dict[reply.comment_id].append(reply)
     if request.method == 'POST':
-        form = CommentReplyForm(request.POST)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.comment = comment
-            reply.user = request.user
-            reply.save()
-            return redirect('book_detail', pk=comment.book.id)
-    else:
-        form = CommentReplyForm()
-
-    replies = comment.replies.all()
-    user_profile_picture = request.user.profile.profile_picture
-
-    return render(request, 'books/book_detail.html', {'book': comment.book, 'replies': replies, 'form': form, 'user_profile_picture': user_profile_picture})
+        comment_id = request.POST.get('comment_id')
+        if comment_id:
+            return LikeCommentView.as_view()(request, comment_id=comment_id)
+    return render(request, 'books/book_detail.html', {'book': book, 'comments': comments, 'comment_replies': comment_reply_dict})
 
 
-def redirect_to_latest_comment(request, book_id):
-    latest_comment = Comment.objects.filter(book_id=book_id).latest('created_at')
-    return redirect(reverse('book_detail', kwargs={'pk': latest_comment.book_id}) + f'#comment-{latest_comment.id}')
+class LikeCommentView(View):
+    def post(self, request, *args, **kwargs):
+        comment_id = kwargs.get('comment_id')
+        comment = get_object_or_404(Comment, pk=comment_id)
+        user_id = request.user.id
+        if user_id:
+            if not CommentLike.objects.filter(comment_id=comment_id, user_id=user_id).exists():
+
+                CommentLike.objects.create(comment_id=comment_id, user_id=user_id)
 
 
 
-
-@login_required
-def reply_to_reply(request, reply_id):
-    reply = get_object_or_404(ReplyComment, id=reply_id)
-    parent_comment = reply.comment
-
-    if request.method == 'POST':
-        form = CommentReplyForm(request.POST)
-        if form.is_valid():
-            new_reply = form.save(commit=False)
-            new_reply.comment = parent_comment
-            new_reply.user = request.user
-            new_reply.save()
-            return redirect('book_detail', pk=parent_comment.book.id)
-    else:
-        form = CommentReplyForm()
-
-    replies = parent_comment.replies.all()
-    user_profile_picture = request.user.profile.profile_picture
-
-    return render(request, 'books/book_detail.html', {'book': parent_comment.book, 'replies': replies, 'form': form, 'user_profile_picture': user_profile_picture})
-
-
+        return redirect('book_detail', book_id=comment.book.id)

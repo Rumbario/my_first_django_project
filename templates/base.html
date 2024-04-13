@@ -24,41 +24,53 @@
             </a>
             {% if user.is_authenticated %}
                 <ul class="navbar-nav ml-auto mr-5">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'favourites' %}">
+                            <i class="fas fa-heart"></i> Любими
+                        </a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span style="color: #ffc107;">
-    <i class="fas fa-user"></i>  {{ user.username }} !
-</span>
+                            <span>
+                                <i class="fas fa-user"></i>  {{ user.username }} !
+                            </span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="userDropdown" style="min-width: 200px;">
-                            <div class="dropdown-item">
-                                {% if user.profile.profile_picture %}
-                                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Image" class="profile-image-navbar rounded-circle mr-2" style="width: 75%;">
-                                {% else %}
-                                    <img src="{% static 'images/default.jpg' %}" alt="Default Profile Image" class="profile-image-navbar rounded-circle mr-2" style="width: 75%;">
-                                {% endif %}
-                            </div>
-                            <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                                <a href="{% url 'user_settings' %}">Настройки</a>
-                            </div>
-                            <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                                <a href="{% url 'change_password' %}">Смяна на парола</a>
-                            </div>
-                            {% if user.is_superuser or user.is_staff %}
-                                <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                                    <a href="{% url 'add_book' %}">Добави книга</a>
-                                </div>
-                            {% endif %}
-                            <div class="dropdown-item" style="background-color: inherit; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                                <a href="{% url 'logout' %}">Изход</a>
-                            </div>
-                        </div>
+                        <div class="dropdown-menu dropdown-menu-dark bg-dark text-center" aria-labelledby="userDropdown" style="min-width: 200px;">
+    <div class="dropdown-item bg-dark text-white">
+        {% if user.profile.profile_picture %}
+            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Image" class="profile-image-navbar rounded-circle mr-2" style="width: 75%;">
+        {% else %}
+            <img src="{% static 'images/profile_picture.jpg' %}" alt="Default Profile Image" class="profile-image-navbar rounded-circle mr-2" style="width: 75%;">
+        {% endif %}
+    </div>
+    <div class="dropdown-item bg-dark text-white">
+    <a href="{% url 'user_settings' %}" class="text-white"><i class="fas fa-cog"></i> Моят Профил</a>
+</div>
+<div class="dropdown-item bg-dark text-white">
+    <a href="{% url 'change_password' %}" class="text-white"><i class="fas fa-key"></i> Смяна на парола</a>
+</div>
+{% if user.is_superuser or user.is_staff %}
+    <div class="dropdown-item bg-dark text-white">
+        <a href="{% url 'add_book' %}" class="text-white"><i class="fas fa-plus"></i> Добави книга</a>
+    </div>
+{% endif %}
+<div class="dropdown-divider"></div>
+<div class="dropdown-item bg-dark text-white">
+    <a href="{% url 'logout' %}" class="text-white"><i class="fas fa-sign-out-alt"></i> Изход</a>
+</div>
+
                     </li>
                 </ul>
             {% else %}
                 <ul class="navbar-nav ml-auto mr-5">
+                <li class="nav-item">
+                        <a class="nav-link" href="{% url 'favourites' %}">
+                            <i class="fas fa-heart"></i> Любими
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt mr-2"></i> Вход</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{%  url 'register' %}"><i class="fas fa-user-plus mr-2" data-toggle="modal" data-target="#registrationModal"></i> Регистрация</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}"><i class="fas fa-user-plus mr-2" data-toggle="modal" data-target="#registrationModal"></i> Регистрация</a></li>
+
                 </ul>
             {% endif %}
         </nav>
@@ -66,27 +78,63 @@
 
     <div class="container-fluid">
         <div class="row">
-        
-        {%  include 'sidebar.html' %}
+
+        {% include 'sidebar.html' %}
 
             <main role="main" class="col-md-9 ml-3">
                 <div class="container">
                     {% block content %}
-
                     {% endblock %}
                 </div>
             </main>
         </div>
     </div>
 
+ <footer class="bg-dark text-center text-white">
+    <div class="container-fluid p-0 mt-4">
+        <div class="row mt-4 justify-content-center">
+            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                <h5 class="text-uppercase">See other books</h5>
+                <ul class="list-unstyled mb-0">
+                    <li>
+                        <a href="#!" class="text-white"><i class="fas fa-book fa-fw fa-sm me-2"></i>Bestsellers</a>
+                    </li>
+                    <li>
+                        <a href="#!" class="text-white"><i class="fas fa-book fa-fw fa-sm me-2"></i>All books</a>
+                    </li>
+                    <li>
+                        <a href="#!" class="text-white"><i class="fas fa-user-edit fa-fw fa-sm me-2"></i>Our authors</a>
+                    </li>
 
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-        <div class="container">
-             <p style="color: #ffc107;">&copy; 2024 Book Review Website. All rights reserved.</p>
+                    <li>&nbsp;</li>
+                </ul>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                <h5 class="text-uppercase">Write to us</h5>
+                <ul class="list-unstyled">
+                    <li>
+                        <a href="#!" class="text-white"><i class="fas fa-at fa-fw fa-sm me-2"></i>Help in purchasing</a>
+                    </li>
+                    <li>
+                        <a href="#!" class="text-white"><i class="fas fa-shipping-fast fa-fw fa-sm me-2"></i>Check the order status</a>
+                    </li>
+                    <li>
+                        <a href="#!" class="text-white"><i class="fas fa-envelope fa-fw fa-sm me-2"></i>Join the newsletter</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </footer>
+    </div>
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+        © 2024 Copyright:
+        <a class="text-white" href="">Bookstagram</a>
+    </div>
+</footer>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+<style>

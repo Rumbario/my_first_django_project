@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, Pass
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserChangeForm as DjangoUserChangeForm
 from djangoProject.profiles.models import Profile
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 class UserLoginForm(AuthenticationForm):
@@ -60,9 +61,27 @@ class UserSettingsForm(forms.ModelForm):
         return user
 
 
+
+
+
 class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(CustomPasswordChangeForm, self).__init__(*args, **kwargs)
+
+
+        self.fields['old_password'].help_text = ''
+        self.fields['new_password1'].help_text = ''
+        self.fields['new_password2'].help_text = ''
+
+        # Премахване на грешките за полетата
+        self.fields['old_password'].error_messages = {'required': ''}
+        self.fields['new_password1'].error_messages = {'required': ''}
+        self.fields['new_password2'].error_messages = {'required': ''}
+
     class Meta:
         model = User
         fields = ['old_password', 'new_password1', 'new_password2']
+
+
 
 

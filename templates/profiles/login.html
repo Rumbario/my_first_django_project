@@ -5,7 +5,14 @@
     <h2>Вход</h2>
     <form method="post" action="{% url 'login' %}">
       {% csrf_token %}
-      {{ form.as_p }}
+      <div class="form-group">
+        <label for="id_username">Потребителско име:</label>
+        {{ form.username }}
+      </div>
+      <div class="form-group">
+        <label for="id_password">Парола:</label>
+        {{ form.password }}
+      </div>
       <button type="submit" class="bg-dark">Влез</button>
     </form>
   </div>

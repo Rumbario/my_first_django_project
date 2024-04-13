@@ -27,3 +27,4 @@ class BookForm(forms.ModelForm):
 
 class BookUpdateForm(BookForm):
     pass
+

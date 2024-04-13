@@ -1,144 +1,211 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
 
 <main class="container mt-5 mb-2">
-   <div class="row">
-    <div class="col-md-4 mb-6 mr-md-4">
-        <a href="{% url 'book_detail' book.id %}">
-            <img src="{{ book.book_cover.url }}" class="img-fluid" alt="Book Cover" style="max-width: 215px;">
-        </a>
-    </div>
-    <div class="col-md-7">
-    <h2>{{ book.title }}</h2>
-    <div class="d-flex justify-content-between align-items-start">
-        <div>
-            <p><strong>Автор:</strong> {{ book.author }}</p>
-            <p><strong>Година на издаване:</strong> {{ book.publication_year }}</p>
-            <p><strong>Жанр:</strong> {{ book.genre }}</p>
-            <p><strong>Брой страници:</strong> {{ book.pages }}</p>
-            <p><strong>Рейтинг:</strong> {{ book.rating }}</p>
-             <p><a href="#" class="btn btn-info" data-toggle="collapse" data-target="#description">Прочети резюме</a></p>
+    <div class="row">
+        <div class="col-md-4">
+            <img src="{{ book.book_cover.url }}" class="img-fluid" alt="Book Cover">
         </div>
-        {% if request.user.is_superuser or request.user.is_staff %}
-        <div class="d-inline-flex align-items-center ml-3" style="margin-top: -30px;"> 
-            <a href="{% url 'book_update' book.id %}" class="btn btn-warning flex-fill mr-2"><i class="fas fa-edit"></i></a>
-            <a href="{% url 'book_delete' book.id %}" class="btn btn-danger flex-fill"><i class="fas fa-trash"></i></a>
-        </div>
-        {% endif %}
-    </div>
-</div>
+        <div class="col-md-4">
+            <h2>{{ book.title }}</h2>
+            <div class="d-inline-flex align-items-center mb-3">
+                {% if request.user.is_superuser or request.user.is_staff %}
+                    <a href="{% url 'book_update' book.id %}" class="btn btn-warning flex-fill mr-2"><i class="fas fa-edit"></i></a>
+                    <button type="button" class="btn btn-danger flex-fill mr-2" data-toggle="modal" data-target="#deleteBookModal"><i class="fas fa-trash"></i></button>
+                {% endif %}
+                <form method="post" action="{% url 'add_to_favorites' pk=pk %}" class="d-inline-flex align-items-center">
+                    {% csrf_token %}
+                    <input type="hidden" name="book_id" value="{{ book.id }}">
+                    <button type="submit" class="btn btn-primary flex-fill"><i class="fas fa-heart"></i></button>
+                </form>
             </div>
-       <div id="description" class="collapse">
+            <div>
+                <p><strong>Автор:</strong> {{ book.author }}</p>
+                <p><strong>Година на издаване:</strong> {{ book.publication_year }}</p>
+                <p><strong>Жанр:</strong> {{ book.genre }}</p>
+                <p><strong>Брой страници:</strong> {{ book.pages }}</p>
+                <p><strong>Рейтинг:</strong>
+                    {% if average_rating %}
+                        {{ average_rating }}
+                    {% else %}
+                        Няма рейтинг
+                    {% endif %}
+                </p>
+                <p><a href="#" class="btn btn-info bg-dark" data-toggle="collapse" data-target="#description">Прочети резюме</a></p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h5 class="mb-0">Оценка на книгата</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'book_detail' pk=book.id %}">
+                        {% csrf_token %}
+                        <button type="submit" name="rating" value="5" class="btn btn-outline-dark btn-block" title="Отличен">5 звезди ⭐⭐⭐⭐⭐</button>
+                        <button type="submit" name="rating" value="4" class="btn btn-outline-dark btn-block" title="Добър">4 звезди ⭐⭐⭐⭐</button>
+                        <button type="submit" name="rating" value="3" class="btn btn-outline-dark btn-block" title="Среден">3 звезди ⭐⭐⭐</button>
+                        <button type="submit" name="rating" value="2" class="btn btn-outline-dark btn-block" title="Слаб">2 звезди ⭐⭐</button>
+                        <button type="submit" name="rating" value="1" class="btn btn-outline-dark btn-block" title="Лош">1 звезда ⭐</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="description" class="collapse">
         <div class="card card-body">
             <h4 class="card-title center">Резюме:</h4>
             <p class="card-text">{{ book.description }}</p>
         </div>
     </div>
 
-
-
-
-
-
-<div class="book-details">
-    <form action="{% url 'add_comment' book.id %}" method="post" class="comment-form">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="comment-text">Добавете коментар:</label>
-            <textarea id="comment-text" name="text" cols="30" rows="5" required></textarea>
-        </div>
-        <button type="submit" class="bg-dark">Добави коментар</button>
-    </form>
-</div>
-
-
-
-
-
-
-
-<div class="comments">
-    <h2>Коментари</h2>
-    {% if book.comment_set.all %}
-        {% for comment in book.comment_set.all %}
-            <div class="comment" id="comment-{{ comment.id }}">
-
-                <div class="comment-meta">
-
-    <img src=" {{ user_profile_picture.url }} " alt="Profile Picture" class="comment-profile-pic rounded-circle float-left mr-2" style="width: 40px; height: 40px;">
-    <span class="comment-author"><strong>{{ comment.user.username }}</strong></span>
-    <span class="comment-date">{{ comment.created_at }}</span>
-
-</div>
-                <div class="comment-content">
-                    <p>{{ comment.text }}</p>
-                    {% if comment.image %}
-                        <img src="{{ comment.image.url }}" alt="Comment Image" class="comment-image">
-                    {% endif %}
+    <div class="modal fade" id="deleteBookModal" tabindex="-1" role="dialog" aria-labelledby="deleteBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteBookModalLabel">Изтриване на книгата</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+                <div class="modal-body">
+                    Сигурни ли сте, че искате да изтриете тази книга?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отказ</button>
+                    <form method="post" action="{% url 'book_delete' book.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Изтрий</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 
-                <div class="comment-actions">
-                    <a href="#reply-form-{{ comment.id }}" class="reply-link" data-toggle="collapse">
-                        <i class="fas fa-reply"></i>
-                    </a>
-                    <a href="#" class="like-icon">
-                        <i class="fas fa-thumbs-up"></i>
-                    </a>
-                    <div id="reply-form-{{ comment.id }}" class="collapse reply-form">
-                        <form action="{% url 'reply_comment' comment_id=comment.id %}" method="post">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label for="comment-reply-text">Отговор на {{ comment.user.username }}</label>
-                                <textarea class="form-control" id="comment-reply-text" name="text" rows="3"></textarea>
+<div class="card mt-4">
+    <div class="card-header text-center">
+        <h5 class="mb-0">
+            <p href="#comments-section">Kоментари:</p>
+        </h5>
+    </div>
+    <div id="comments-section">
+        {% for comment in comments reversed %}
+            <div class="media mt-4">
+                <img class="mr-3" src="{% if comment.user.profile.profile_picture %}{{ comment.user.profile.profile_picture.url }}{% else %}{% static 'images/profile_picture.jpg' %}{% endif %}" alt="Profile Image" style="width: 64px; height: 64px;">
+                <div class="media-body">
+                    <h5 class="mt-0">{{ comment.user.username }}</h5>
+                    <p>{{ comment.text }}</p>
+                    <div class="text-right">
+                        {% if request.user.is_authenticated and comment.user == request.user %}
+                            <a type="button" class="btn btn-link bg-dark" onclick="editComment({{ comment.id }})">
+                                <i class="fas fa-edit text-white"></i>
+                            </a>
+                            <a type="button" class="btn btn-link bg-dark" onclick="deleteComment({{ comment.id }})">
+                                <i class="fas fa-trash text-white"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <form method="post" action="{% url 'add_reply' comment.id %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="reply"></label>
+                            <textarea name="text" class="form-control" rows="1" placeholder="Reply to {{ comment.user.username }}"></textarea>
+                        </div>
+                        <small>{{ comment.created_at|timesince }} ago</small>
+                        <a href="#" onclick="this.closest('form').submit(); return false;">Отговори</a>
+                        <a href="#">Харесай</a>
+                    </form>
+                    {% for reply in comment.replies.all  %}
+                            <div class="media mt-3">
+                                <img class="mr-3" src="{% if reply.user.profile.profile_picture %}{{ reply.user.profile.profile_picture.url }}{% else %}{% static 'images/profile_picture.jpg' %}{% endif %}" alt="Profile Image" style="width: 48px; height: 48px;">
+                                <div class="media-body">
+                                    <h6 class="mt-0">{{ reply.user.username }}</h6>
+                                    <p>{{ reply.text }}</p>
+                                    <div class="text-right">
+                                        {% if request.user.is_authenticated and reply.user == request.user %}
+                                            <a type="button" class="btn btn-link bg-dark" onclick="editComment({{ reply.id }})">
+                                                <i class="fas fa-edit text-white"></i>
+                                            </a>
+                                            <a type="button" class="btn btn-link bg-dark" onclick="deleteComment({{ reply.id }})">
+                                                <i class="fas fa-trash text-white"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    <form method="post" action="{% url 'add_reply' comment.id %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="reply"></label>
+                                            <textarea name="text" class="form-control" rows="1" placeholder="Reply to {{ reply.user.username }}"></textarea>
+                                        </div>
+                                        <small>{{ reply.created_at|timesince }} ago</small>
+                                        <a href="#" onclick="this.closest('form').submit(); return false;">Отговори</a>
+                                        <a href="#">Харесай</a>
+                                    </form>
+                                </div>
                             </div>
-                            <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
-                            <button type="submit" class="btn btn-primary btn-sm">Изпрати</button>
-                        </form>
+                        {% endfor %}
                     </div>
                 </div>
-              <div class="replies collapse" id="replies-{{ comment.id }}">
-    {% for reply in comment.replycomment_set.all %}
-        <div class="reply" style="margin-left: 60px;">
-            <div class="reply-meta">
-                <img src="{{ reply.user.profile_picture.url }}" alt="Profile Picture" class="reply-profile-pic rounded-circle float-left mr-2" style="width: 40px; height: 40px;">
-                <span class="reply-author"><strong>{{ reply.user.username }}</strong></span>
-                <span class="reply-date">{{ reply.created_at }}</span>
-            </div>
-            <p>{{ reply.text }}</p>
+            {% endfor %}
         </div>
-    {% endfor %}
-</div>
+    </div>
 
-                <button class="btn btn-outline-primary btn-sm toggle-replies-btn" type="button" data-toggle="collapse" data-target="#replies-{{ comment.id }}" aria-expanded="false" aria-controls="replies-{{ comment.id }}">
-                    Покажи
-                </button>
+
+<div class="media mt-3">
+    <img class="mr-3" src="{% if request.user.profile.profile_picture %}{{ request.user.profile.profile_picture.url }}{% else %}{% static 'images/profile_picture.jpg' %}{% endif %}" alt="Profile Image" style="width: 64px; height: 64px;">
+    <div class="media-body">
+        <form method="post" action="{% url 'add_comment' book.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="comment"></label>
+                <textarea name="text" class="form-control" id="comment" rows="3"></textarea>
             </div>
-        {% endfor %}
-    {% endif %}
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary bg-dark">Добави коментар</button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<script>
 
-    var toggleButtons = document.querySelectorAll('.toggle-replies-btn');
-    toggleButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            var repliesCount = this.parentNode.querySelector('.replies').querySelectorAll('.reply').length;
 
-            if (this.textContent === 'Скрий ' + repliesCount + ' отговора/а') {
-                this.textContent = 'Покажи ' + repliesCount + ' отговора/а';
-            } else {
-                this.textContent = 'Скрий ' + repliesCount + ' отговора/а';
-            }
-        });
-    });
-</script>
+  <nav aria-label="Comments pagination" class="mt-4">
+    <ul class="pagination justify-content-center bg-dark">
+        {% if comments.has_previous %}
+            <li class="page-item bg-dark">
+                <a class="page-link text-white bg-dark" href="?page=1">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-white bg-dark" href="?page={{ comments.previous_page_number }}">Previous</a>
+            </li>
+        {% endif %}
+
+        {% for page in comments.paginator.page_range %}
+            {% if page == comments.number %}
+                <li class="page-item bg-dark" aria-current="page">
+                    <span class="page-link text-white bg-dark">{{ page }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link text-white bg-dark" href="?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if comments.has_next %}
+            <li class="page-item">
+                <a class="page-link text-white bg-dark" href="?page={{ comments.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-white bg-dark" href="?page={{ comments.paginator.num_pages }}">Last</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
 
 
 
 {% endblock %}
-
-
-
-
-
-

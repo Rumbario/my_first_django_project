@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+    <h1>Searched Results</h1>
+    <ul>
+        {% for book in results %}
+            <li>{{ book.title }}</li>
+        {% empty %}
+            <p>No results found.</p>
+        {% endfor %}
+    </ul>
+{% endblock %}
