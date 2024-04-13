@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="text-center mt-4 mb-5">Любими книги</h2>
+        <div class="row">
+            {% for favorite_book in favorite_books %}
+                <div class="col-md-2 mb-3">
+                    <div class="text-left">
+                        <a href="{% url 'book_detail' favorite_book.book.id %}">
+                            {% if favorite_book.book.book_cover %}
+                                <img src="{{ favorite_book.book.book_cover.url }}" class="card-img-top img-thumbnail" alt="Book Cover" style="max-width: 100%; height: auto;">
+                            {% endif %}
+                        </a>
+                        <div class="card-body">
+                            <a href="{% url 'book_detail' favorite_book.book.id %}">
+                                <h5 class="card-title mb-0" style="font-size: 14px;">{{ favorite_book.book.title }}</h5>
+                            </a>
+                            <p class="mb-0" style="font-size: 12px; color: darkgray;">{{ favorite_book.book.author }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter|divisibleby:6 and not forloop.last %}
+                    </div><div class="row">
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
